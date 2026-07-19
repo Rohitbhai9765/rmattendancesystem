@@ -1,3 +1,10 @@
+import { ieeStudents } from './ieeStudents';
+import { pcsStudents } from './pcsStudents';
+import { afeStudents } from './afeStudents';
+import { bimStudents } from './bimStudents';
+import { ctmStudents } from './ctmStudents';
+import { dhsStudents } from './dhsStudents';
+
 export const studentsData = [
   { srNo: 1, mis: "612301001", name: "ABHIMANYU ASHISH BHARGAVA" },
   { srNo: 2, mis: "612301003", name: "ANJALI JADHAV" },
@@ -106,3 +113,25 @@ export const studentsData = [
   { srNo: 105, mis: "642401015", name: "HARIS BIN SAJAD" },
   { srNo: 106, mis: "642401016", name: "VISHWANLIALI MADANSINH PATALE-PATIL" }
 ];
+
+export const getStudentsForSubject = (subjectId) => {
+  if (subjectId === 'iee') {
+    return ieeStudents;
+  }
+  if (subjectId === 'pcs') {
+    return pcsStudents;
+  }
+  if (subjectId === 'afe') {
+    return afeStudents;
+  }
+  if (subjectId === 'bim') {
+    return bimStudents;
+  }
+  if (subjectId === 'ctm') {
+    return ctmStudents;
+  }
+  if (subjectId === 'dhs') {
+    return dhsStudents;
+  }
+  return studentsData;
+};

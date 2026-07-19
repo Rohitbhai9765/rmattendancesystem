@@ -1,13 +1,13 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-export const generateDailyPDF = (dateStr, presentStudents, studentsData) => {
+export const generateDailyPDF = (dateStr, presentStudents, studentsData, subjectTitle, professorName) => {
   const doc = new jsPDF();
 
-  // Header: Research Methodology
+  // Header: Subject Title
   doc.setFont("helvetica", "bold");
   doc.setFontSize(22);
-  const title = "Research Methodology";
+  const title = subjectTitle || "Attendance Report";
   const titleWidth = doc.getTextWidth(title);
   const xTitle = (doc.internal.pageSize.width - titleWidth) / 2;
   doc.text(title, xTitle, 25);
@@ -20,7 +20,7 @@ export const generateDailyPDF = (dateStr, presentStudents, studentsData) => {
   // Subheaders
   doc.setFont("helvetica", "bold");
   doc.setFontSize(12);
-  doc.text("Professor: Shrashti Singh", 20, 40);
+  doc.text(`Professor: ${professorName || 'Unknown'}`, 20, 40);
 
   doc.setFont("helvetica", "normal");
 

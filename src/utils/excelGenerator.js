@@ -1,7 +1,7 @@
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 
-export const generateDailyExcel = async (date, presentStudents, studentsData) => {
+export const generateDailyExcel = async (date, presentStudents, studentsData, subjectTitle, professorName) => {
   const d = new Date(date);
   const yy = String(d.getFullYear()).slice(-2);
   const mm = String(d.getMonth() + 1).padStart(2, '0');
@@ -34,13 +34,13 @@ export const generateDailyExcel = async (date, presentStudents, studentsData) =>
   ];
 
   // Title Row (Row 1)
-  const titleRow = worksheet.addRow(['Research Methodology']);
+  const titleRow = worksheet.addRow([subjectTitle || 'Attendance Report']);
   worksheet.mergeCells('A1:D1');
   titleRow.font = { name: 'Arial', size: 16, bold: true };
   titleRow.alignment = { horizontal: 'center' };
 
   // Subtitle Row (Row 2)
-  const subRow = worksheet.addRow(['Professor: Shrashti Singh', '', '', `Date: ${formattedDate}`]);
+  const subRow = worksheet.addRow([`Professor: ${professorName || 'Unknown'}`, '', '', `Date: ${formattedDate}`]);
   worksheet.mergeCells('A2:C2');
   subRow.font = { name: 'Arial', size: 12, bold: true };
 
@@ -95,7 +95,7 @@ export const generateDailyExcel = async (date, presentStudents, studentsData) =>
   saveAs(new Blob([buffer]), `Attendance_${date}.xlsx`);
 };
 
-export const generateStatisticsExcel = async (stats, totalClasses) => {
+export const generateStatisticsExcel = async (stats, totalClasses, subjectTitle, professorName) => {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Statistics');
 
@@ -108,13 +108,13 @@ export const generateStatisticsExcel = async (stats, totalClasses) => {
   ];
 
   // Title Row (Row 1)
-  const titleRow = worksheet.addRow(['Research Methodology - Attendance Report']);
+  const titleRow = worksheet.addRow([`${subjectTitle || 'Subject'} - Attendance Report`]);
   worksheet.mergeCells('A1:E1');
   titleRow.font = { name: 'Arial', size: 16, bold: true };
   titleRow.alignment = { horizontal: 'center' };
 
   // Subtitle Row (Row 2)
-  const subRow = worksheet.addRow(['Professor: Shrashti Singh']);
+  const subRow = worksheet.addRow([`Professor: ${professorName || 'Unknown'}`]);
   worksheet.mergeCells('A2:E2');
   subRow.font = { name: 'Arial', size: 12, bold: true };
 

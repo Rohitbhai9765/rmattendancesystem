@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { getAttendanceRecords } from '../services/db';
-import { studentsData } from '../data/studentsData';
+import { getStudentsForSubject } from '../data/studentsData';
 import { generateDailyPDF } from '../utils/pdfGenerator';
 import { generateDailyExcel } from '../utils/excelGenerator';
 import { Download, ChevronDown } from 'lucide-react';
 
-export default function ViewerPanel() {
+export default function ViewerPanel({ activeSubject }) {
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [presentStudents, setPresentStudents] = useState([]);
   const [lectureConducted, setLectureConducted] = useState(false);
@@ -26,20 +26,21 @@ export default function ViewerPanel() {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      const records = await getAttendanceRecords();
+      const records = await getAttendanceRecords(activeSubject.id);
       setPresentStudents(records[date]?.presentStudents || []);
       setLectureConducted(records[date]?.lectureConducted ?? false);
       setLoading(false);
     };
     loadData();
-  }, [date]);
+  }, [date, activeSubject.id]);
 
   const handleDownloadPDF = () => {
     if (!presentStudents || presentStudents.length === 0) {
       alert("No attendance has been marked for this date yet!");
       return;
     }
-    generateDailyPDF(date, presentStudents, studentsData);
+    const currentStudents = getStudentsForSubject(activeSubject.id);
+    generateDailyPDF(date, presentStudents, currentStudents, activeSubject.title, activeSubject.professor);
     setShowDropdown(false);
   };
 
@@ -48,7 +49,8 @@ export default function ViewerPanel() {
       alert("No attendance has been marked for this date yet!");
       return;
     }
-    generateDailyExcel(date, presentStudents, studentsData);
+    const currentStudents = getStudentsForSubject(activeSubject.id);
+    generateDailyExcel(date, presentStudents, currentStudents, activeSubject.title, activeSubject.professor);
     setShowDropdown(false);
   };
 
@@ -116,7 +118,7 @@ export default function ViewerPanel() {
             </tr>
           </thead>
           <tbody>
-            {loading ? <tr><td colSpan="4">Loading...</td></tr> : studentsData.map((student) => {
+            {loading ? <tr><td colSpan="4">Loading...</td></tr> : getStudentsForSubject(activeSubject.id).map((student) => {
               const isPresent = presentStudents.includes(student.mis);
               return (
                 <tr key={student.mis}>

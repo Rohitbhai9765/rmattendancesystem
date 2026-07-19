@@ -1,27 +1,28 @@
 import { useState, useEffect } from 'react';
-import { studentsData } from '../data/studentsData';
+import { getStudentsForSubject } from '../data/studentsData';
 import { getAttendanceRecords, saveAttendance } from '../services/db';
 
-export default function AttendanceTable() {
+export default function AttendanceTable({ activeSubject }) {
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [attendance, setAttendance] = useState({});
   const [lectureConducted, setLectureConducted] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
-      const records = await getAttendanceRecords();
+      const records = await getAttendanceRecords(activeSubject.id);
       const todaysRecord = records[date]?.presentStudents || [];
       const isConducted = records[date]?.lectureConducted ?? false;
       
       const initialAttendance = {};
-      studentsData.forEach(student => {
+      const currentStudents = getStudentsForSubject(activeSubject.id);
+      currentStudents.forEach(student => {
         initialAttendance[student.mis] = todaysRecord.includes(student.mis);
       });
       setAttendance(initialAttendance);
       setLectureConducted(isConducted);
     };
     loadData();
-  }, [date]);
+  }, [date, activeSubject.id]);
 
   const handleToggle = (mis) => {
     if (!lectureConducted) return;
@@ -33,25 +34,26 @@ export default function AttendanceTable() {
     
     // Save to DB
     const presentStudents = Object.keys(updated).filter(k => updated[k]);
-    saveAttendance(date, presentStudents, lectureConducted);
+    saveAttendance(date, activeSubject.id, presentStudents, lectureConducted);
   };
 
   const markAll = (present) => {
     if (!lectureConducted) return;
     const updated = {};
-    studentsData.forEach(s => {
+    const currentStudents = getStudentsForSubject(activeSubject.id);
+    currentStudents.forEach(s => {
       updated[s.mis] = present;
     });
     setAttendance(updated);
-    const presentStudents = present ? studentsData.map(s => s.mis) : [];
-    saveAttendance(date, presentStudents, lectureConducted);
+    const presentStudents = present ? currentStudents.map(s => s.mis) : [];
+    saveAttendance(date, activeSubject.id, presentStudents, lectureConducted);
   };
 
   const handleLectureToggle = () => {
     const newStatus = !lectureConducted;
     setLectureConducted(newStatus);
     const presentStudents = Object.keys(attendance).filter(k => attendance[k]);
-    saveAttendance(date, presentStudents, newStatus);
+    saveAttendance(date, activeSubject.id, presentStudents, newStatus);
   };
 
   return (
@@ -96,7 +98,7 @@ export default function AttendanceTable() {
             </tr>
           </thead>
           <tbody>
-            {studentsData.map((student) => (
+            {getStudentsForSubject(activeSubject.id).map((student) => (
               <tr key={student.mis}>
                 <td>{student.srNo}</td>
                 <td>{student.mis}</td>

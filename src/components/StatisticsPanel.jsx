@@ -6,7 +6,7 @@ import autoTable from 'jspdf-autotable';
 import { Download, ChevronDown } from 'lucide-react';
 import { generateStatisticsExcel } from '../utils/excelGenerator';
 
-export default function StatisticsPanel() {
+export default function StatisticsPanel({ activeSubject }) {
   const [stats, setStats] = useState([]);
 
   const [showDropdown, setShowDropdown] = useState(false);
@@ -24,21 +24,21 @@ export default function StatisticsPanel() {
 
   useEffect(() => {
     const loadData = async () => {
-      const data = await getStudentStatistics();
+      const data = await getStudentStatistics(activeSubject.id);
       setStats(data);
     };
     loadData();
-  }, []);
+  }, [activeSubject.id]);
 
   const totalClasses = stats.length > 0 ? stats[0].totalClasses : 0;
   
   const generatePDF = () => {
     const doc = new jsPDF();
     doc.setFont("helvetica", "bold");
-    doc.text("Research Methodology - Attendance Report", 14, 20);
+    doc.text(`${activeSubject.title} - Attendance Report`, 14, 20);
     doc.setFontSize(12);
     doc.setFont("helvetica", "normal");
-    doc.text("Professor: Shrashti Singh", 14, 28);
+    doc.text(`Professor: ${activeSubject.professor}`, 14, 28);
     doc.text(`Total Classes Conducted: ${totalClasses}`, 14, 35);
     
     const tableData = stats.map(s => [
@@ -65,7 +65,7 @@ export default function StatisticsPanel() {
   };
 
   const generateExcel = () => {
-    generateStatisticsExcel(stats, totalClasses);
+    generateStatisticsExcel(stats, totalClasses, activeSubject.title, activeSubject.professor);
     setShowDropdown(false);
   };
 

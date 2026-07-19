@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: __dirname + '/.env' });
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -22,7 +22,12 @@ mongoose.connect(MONGO_URI)
 // 1. Get all attendance records
 app.get('/api/attendance', async (req, res) => {
   try {
-    const records = await Attendance.find();
+    const { subjectId } = req.query;
+    if (!subjectId) {
+      return res.status(400).json({ error: 'subjectId is required' });
+    }
+
+    const records = await Attendance.find({ subjectId });
     // Transform DB array into the key-value map the frontend expects
     const attendanceMap = {};
     records.forEach(record => {
@@ -41,11 +46,15 @@ app.get('/api/attendance', async (req, res) => {
 // 2. Save or update attendance for a specific date
 app.post('/api/attendance', async (req, res) => {
   try {
-    const { date, presentStudents, lectureConducted = false } = req.body;
+    const { date, subjectId, presentStudents, lectureConducted = false } = req.body;
+    
+    if (!subjectId) {
+      return res.status(400).json({ error: 'subjectId is required' });
+    }
     
     // Upsert: Create if it doesn't exist, update if it does
     await Attendance.findOneAndUpdate(
-      { date },
+      { date, subjectId },
       { presentStudents, lectureConducted },
       { upsert: true, new: true }
     );
